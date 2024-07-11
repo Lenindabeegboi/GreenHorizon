@@ -45,6 +45,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* PauseMenu;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuilderWidget")
+	TSubclassOf<UUserWidget> WBuilder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuilderWidget")
+	UUserWidget* Builder;
+
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void ShowMainMenu();
@@ -73,6 +79,11 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void CreateGeneration();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void ShowBuilder();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void HideBuilder();
 
 	bool bGamePaused;
 

@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MainPlayerController.h"
+#include "BuilderComponent.h"
+#include "Blueprint/UserWidget.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -17,6 +19,7 @@ AExamplePawn::AExamplePawn()
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetupAttachment(SpringArmComponent, SpringArmComponent->SocketName); 
+	BuilderComponent = CreateDefaultSubobject<UBuilderComponent>(TEXT("BuilderComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -37,7 +40,9 @@ void AExamplePawn::BeginPlay()
 		SetActorLocation(Position);
 		SetActorRotation(Rotation);
 
+		PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("BEGIN")); 
+
 	}
 }
 
@@ -80,20 +85,45 @@ void AExamplePawn::Zoom(float Magnitude)
 
 void AExamplePawn::PauseMenu()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("PAUSING"));
-	AMainPlayerController* PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (PlayerController) 
 	{ 
 		if (PlayerController->bGamePaused == false)
 		{
 			PlayerController->ShowPauseMenu();
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("PAUSING"));
 		}
 		else
 		{
 			PlayerController->HidePauseMenu();
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("RESUMING"));
 		}
 	}
 }
+
+void AExamplePawn::Place()
+{
+
+}
+
+void AExamplePawn::ToggleBuilder()
+{
+	if (PlayerController->Builder)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("BUILDER"));
+		if (PlayerController->Builder->IsVisible() == true)
+		{
+			PlayerController->HideBuilder();
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("HIDING BUILDER"));
+		}
+		else
+		{
+			PlayerController->ShowBuilder();
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("SHOWING BUILDER"));
+		}
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("BUILDER TEST 2"));
+}
+
 
 // Called every frame
 void AExamplePawn::Tick(float DeltaTime)
@@ -118,4 +148,6 @@ void AExamplePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Zoom", this, &AExamplePawn::Zoom);
 
 	PlayerInputComponent->BindAction("PauseMenu", IE_Pressed, this, &AExamplePawn::PauseMenu);
+	PlayerInputComponent->BindAction("PlaceEstablishment", IE_Pressed, this, &AExamplePawn::Place);
+	PlayerInputComponent->BindAction("Builder", IE_Pressed, this, &AExamplePawn::ToggleBuilder); 
 }

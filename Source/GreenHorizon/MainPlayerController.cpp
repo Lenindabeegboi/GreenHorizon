@@ -21,21 +21,17 @@ void AMainPlayerController::ShowMainMenu_Implementation()
 
 			FInputModeUIOnly UIOnly;
 			SetInputMode(UIOnly);
-			bShowMouseCursor = true;
 		}
 	}
 }
 
 void AMainPlayerController::HideMainMenu_Implementation()
 {
-	if (WMainMenu) 
-	{
-		if (MainMenu)
-		{
-			MainMenu->RemoveFromViewport(); 
-			MainMenu->SetVisibility(ESlateVisibility::Hidden); 
 
-		}
+	if (MainMenu)
+	{
+		MainMenu->RemoveFromViewport(); 
+		MainMenu->SetVisibility(ESlateVisibility::Hidden); 
 	}
 }
 
@@ -58,14 +54,11 @@ void AMainPlayerController::ShowSelectGeneration_Implementation()
 
 void AMainPlayerController::HideSelectGeneration_Implementation()
 {
-	if (WSelectGeneration)
-	{
-		if (SelectGeneration)
-		{
-			SelectGeneration->RemoveFromViewport();
-			SelectGeneration->SetVisibility(ESlateVisibility::Hidden);
 
-		}
+	if (SelectGeneration)
+	{
+		SelectGeneration->RemoveFromViewport();
+		SelectGeneration->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -87,14 +80,11 @@ void AMainPlayerController::ShowNewGeneration_Implementation()
 
 void AMainPlayerController::HideNewGeneration_Implementation()
 {
-	if (WNewGeneration)
-	{
-		if (NewGeneration)
-		{
-			NewGeneration->RemoveFromViewport();
-			NewGeneration->SetVisibility(ESlateVisibility::Hidden);
 
-		}
+	if (NewGeneration)
+	{
+		NewGeneration->RemoveFromViewport();
+		NewGeneration->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -116,14 +106,12 @@ void AMainPlayerController::ShowSettings_Implementation()
 
 void AMainPlayerController::HideSettings_Implementation()
 {
-	if (WSettings)
-	{
-		if (Settings)
-		{
-			Settings->RemoveFromViewport();
-			Settings->SetVisibility(ESlateVisibility::Hidden);
 
-		}
+	if (Settings)
+	{
+		Settings->RemoveFromViewport();
+		Settings->SetVisibility(ESlateVisibility::Hidden);
+
 	}
 }
 
@@ -135,17 +123,27 @@ void AMainPlayerController::CreateGeneration_Implementation()
 
 	FInputModeGameAndUI GameAndUI;
 	SetInputMode(GameAndUI);
-	bShowMouseCursor = false;
 	bGamePaused = false; 
 }
 
 void AMainPlayerController::BeginPlay()
 {
+	bShowMouseCursor = true;
 	FString Current = GetWorld()->GetMapName();
 	Current.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 	if (Current == "MainMenu")
 	{
 		ShowMainMenu();
+	}
+	else
+	{
+		if (WBuilder)
+		{
+			if (!Builder)
+			{
+				Builder = CreateWidget<UUserWidget>(this, WBuilder);
+			}
+		}
 	}
 }
 
@@ -161,7 +159,6 @@ void AMainPlayerController::ShowPauseMenu_Implementation()
 		{
 			PauseMenu->AddToViewport();
 			PauseMenu->SetVisibility(ESlateVisibility::Visible);
-			bShowMouseCursor = true;
 			bGamePaused = true;
 		}
 	}
@@ -169,13 +166,31 @@ void AMainPlayerController::ShowPauseMenu_Implementation()
 
 void AMainPlayerController::HidePauseMenu_Implementation()
 {
-	if (WPauseMenu)
+	if (PauseMenu)
 	{
-		if (PauseMenu)
-		{
-			PauseMenu->RemoveFromViewport();
-			PauseMenu->SetVisibility(ESlateVisibility::Hidden);
-			bGamePaused = false; 
-		}
+		PauseMenu->RemoveFromViewport();
+		PauseMenu->SetVisibility(ESlateVisibility::Hidden);
+		bGamePaused = false; 
+	}
+
+}
+
+void AMainPlayerController::ShowBuilder_Implementation()
+{
+	if (Builder)
+	{
+		Builder->AddToViewport();
+		Builder->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AMainPlayerController::HideBuilder_Implementation()
+{
+
+	if (Builder)
+	{
+		Builder->RemoveFromViewport();
+		Builder->SetVisibility(ESlateVisibility::Hidden);
+
 	}
 }

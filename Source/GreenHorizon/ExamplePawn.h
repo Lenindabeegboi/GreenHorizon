@@ -22,6 +22,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpringArm")
 	class USpringArmComponent* SpringArmComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerController")
+	class AMainPlayerController* PlayerController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Builder")
+	class UBuilderComponent* BuilderComponent; 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,11 +46,13 @@ private:
 	void MoveSideways(float Direction);
 
 	void Rotate(float Magnitude);
-
 	void Zoom(float Magnitude);
 
-	UFUNCTION()
 	void PauseMenu();
+
+	void Place();
+	void ToggleBuilder(); 
+
 
 public:	
 	// Called every frame
