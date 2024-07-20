@@ -23,12 +23,6 @@ UBuilderComponent::UBuilderComponent()
 void UBuilderComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	FString Current = GetWorld()->GetMapName();
-	Current.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
-	if (Current != "MainMenu")
-	{
-		
-	}
 	// ...
 	
 }

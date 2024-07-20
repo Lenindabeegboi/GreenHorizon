@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+
+
 UCLASS()
 class GREENHORIZON_API AMainPlayerController : public APlayerController
 {
@@ -51,6 +54,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuilderWidget")
 	UUserWidget* Builder;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
+	TSubclassOf<UUserWidget> WGameHUD;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
+	UUserWidget* GameHUD;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gnereation Info")
+	class UGenerationInformation* GenerationInfo;
+
+	class USaveGeneration* LoadInstance;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void ShowMainMenu();
@@ -77,13 +90,35 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void HidePauseMenu();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
-	void CreateGeneration();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Generation")
+	void CreateGeneration(FName GenerationName = NAME_None);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Generation")
+	void QuitGeneration();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void ShowBuilder();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void HideBuilder();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void ShowGameHUD();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void HideGameHUD();
+
+	void TranslatePlayerInformation(FVector& Position, FRotator& Rotation);
+	void ChangeGenerationInfo(FVector Position, FRotator Rotation, float Length, float CO2, int32 Population, int32 Economy, int32 Month, float TimeElapsed, FName GenerationName, float SustainabilityScore, int32 ResidentialArea);
+	void SaveGeneration();
+
+	void SpawnEstatablishments(class FName GenerationName); 
+
+	void MonthUpdate(); 
+	void UpdateSustainability();
+	void GenerateWealth(); 
+	void UpdateCO2(); 
+
+	void UpdatePopulation(); 
+
+	void YearlyReward(); 
 
 	bool bGamePaused;
 

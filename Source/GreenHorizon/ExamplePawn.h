@@ -28,6 +28,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Builder")
 	class UBuilderComponent* BuilderComponent; 
 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Builder")
+	TSubclassOf<class AEstablishment> SelectedEstablishmentClass;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,7 +45,10 @@ private:
 	FRotator Rotation;
 	FRotator RotationalVelocity;
 	float ZoomMovement;
+	float ZoomSpeed;
 
+	//bool bPlacedEstablishment;
+	class AEstablishment* SelectedEstablishment; 
 
 	void MoveStraight(float Direction);
 	void MoveSideways(float Direction);

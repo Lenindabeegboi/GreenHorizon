@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Establishment.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class GREENHORIZON_API AEstablishment : public AActor
 {
 	GENERATED_BODY()
@@ -16,20 +16,18 @@ public:
 	AEstablishment();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sustainability")
-	int32 Sustainability {0};
+	float Sustainability {0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* Structure;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
-	FName Name{ "Name" };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cost")
+	int32 Cost {1000};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Description")
-	FString Description{ "Description" };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger")
+	class UBoxComponent* BoxComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thumbnail")
-	UTexture2D* Thumbnail;
-
+	bool bConflictingWithOutsideEstablishment;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -38,5 +36,11 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnEstablishmentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnEstablishmentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 };

@@ -17,7 +17,7 @@ public:
 	UBuilderComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Establishments")
-	TArray<TSubclassOf<class AEstablishment>> EstablishmentsList;
+	TArray<class UEstablishmentDataAsset*> EstablishmentsList;
 
 protected:
 	// Called when the game starts
