@@ -143,14 +143,13 @@ void AMainPlayerController::SpawnEstatablishments(FName GenerationName)
 {
 	USaveGeneration* SaveInstance = Cast<USaveGeneration>(UGameplayStatics::LoadGameFromSlot(GenerationName.ToString(), 0));
 
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("Function Called"));
+
 	if (SaveInstance->ListOfPlacedEstablishments.Num() != 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("Has Tuples"));
 		FActorSpawnParameters SpawnInfo; 
-		for (TTuple<FVector, TSubclassOf<AEstablishment>>& Establishment : SaveInstance->ListOfPlacedEstablishments) 
+		for (TPair<FVector, TSubclassOf<AEstablishment>>& Establishment : SaveInstance->ListOfPlacedEstablishments) 
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, FString::Printf(TEXT("Spawning Establishment: %s at %s"), *GetNameSafe(Establishment.Value), *Establishment.Key.ToString()));
+
 			GetWorld()->SpawnActor<AEstablishment>(Establishment.Value, Establishment.Key, FRotator::ZeroRotator, SpawnInfo);
 		}
 	} 
@@ -171,7 +170,7 @@ void AMainPlayerController::UpdateSustainability()
 			TotalSustainability += Establishment->Sustainability;
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, FString::Printf(TEXT("Counter: %02d"), Establishments.Num()));
+
 	GenerationInfo->SustainabilityScore = TotalSustainability / Establishments.Num();
 }
 
@@ -227,16 +226,13 @@ void AMainPlayerController::MonthUpdate()
 		UpdatePopulation();
 		UpdateCO2();
 		GenerateWealth();
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Green, TEXT("Month Passed"));
 	}
 	catch (...)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, TEXT("Something Wrong With Calculation"));
 	}
 	if (GenerationInfo->Month % 12 == 0 && GenerationInfo->Month != 0) 
 	{ 
 		YearlyReward(); 
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("REWARD YEAAAH"));
 	}
 }
 
@@ -262,12 +258,6 @@ void AMainPlayerController::CreateGeneration_Implementation(FName GenerationName
 	}
 
 	UGameplayStatics::OpenLevel(GetWorld(), FName("City"));
-
-	//if (LoadInstance) { SpawnEstatablishments(LoadInstance); GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("Spawned all actors")); }
-
-	FInputModeGameAndUI GameAndUI; 
-	SetInputMode(GameAndUI); 
-	bGamePaused = false; 
 }
 
 void AMainPlayerController::ShowGameHUD_Implementation()
@@ -331,7 +321,6 @@ void AMainPlayerController::SaveGeneration()
 			FVector Location = Establishment->GetActorLocation();
 			SaveInstance->ListOfPlacedEstablishments.Add(Location, Establishment->GetClass()); 
 			Actor->Destroy();
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, FString::Printf(TEXT("%s"), *GetNameSafe(Establishment->GetClass())));
 		}  
 	} 
 
@@ -340,7 +329,7 @@ void AMainPlayerController::SaveGeneration()
 	
 	if (!GenerationList) { GenerationList = Cast<UGenerationLists>(UGameplayStatics::CreateSaveGameObject(UGenerationLists::StaticClass())); }
 		
-	GenerationList->ListOfSavedGenerations.Add(SaveInstance->GenerationName);
+	GenerationList->ListOfSavedGenerations.AddUnique(SaveInstance->GenerationName);
 	
 
 	UGameplayStatics::SaveGameToSlot(SaveInstance, SaveInstance->GenerationName.ToString(), 0);
@@ -359,7 +348,7 @@ void AMainPlayerController::BeginPlay()
 	}
 	else
 	{
-		if (LoadInstance) { SpawnEstatablishments(GenerationInfo->GenerationName); }
+		if (GenerationInfo->GameLoadStatus != ELoadingGameType::New) { SpawnEstatablishments(GenerationInfo->GenerationName); }
 		ShowGameHUD();
 		if (WBuilder)
 		{
@@ -368,6 +357,9 @@ void AMainPlayerController::BeginPlay()
 				Builder = CreateWidget<UUserWidget>(this, WBuilder);
 			}
 		}
+		FInputModeGameAndUI GameAndUI; 
+		SetInputMode(GameAndUI); 
+		bGamePaused = false;  
 	}
 }
 

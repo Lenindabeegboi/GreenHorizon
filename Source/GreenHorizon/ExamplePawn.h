@@ -28,10 +28,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Builder")
 	class UBuilderComponent* BuilderComponent; 
 
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Builder")
 	TSubclassOf<class AEstablishment> SelectedEstablishmentClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundCue* ErrorSoundCue;
 
 protected:
 	// Called when the game starts or when spawned
@@ -49,6 +50,7 @@ private:
 
 	//bool bPlacedEstablishment;
 	class AEstablishment* SelectedEstablishment; 
+	class AEstablishment* HighlightedEstablishment;
 
 	void MoveStraight(float Direction);
 	void MoveSideways(float Direction);
@@ -59,6 +61,9 @@ private:
 	void PauseMenu();
 
 	void Place();
+	void Select();
+	void Delete();
+	void Duplicate();
 	void ToggleBuilder(); 
 
 

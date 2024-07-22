@@ -11,6 +11,8 @@ AEstablishment::AEstablishment()
 	PrimaryActorTick.bCanEverTick = true;
 	Structure = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	Structure->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Structure->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
+
 	RootComponent = Structure;
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerComponent"));
 	

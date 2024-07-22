@@ -10,7 +10,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GenerationInformation.h"
 #include "ResidentialProperty.h"
-#include <Kismet/GameplayStatics.h>
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h" 
 
 // Sets default values
 AExamplePawn::AExamplePawn()
@@ -35,7 +36,6 @@ void AExamplePawn::BeginPlay()
 		Super::BeginPlay(); 
 
 		PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("BEGIN")); 
 
 		Velocity = FVector(0.f, 0.f, 0.f);
 		Speed = 300.f;
@@ -57,38 +57,22 @@ void AExamplePawn::BeginPlay()
 void AExamplePawn::MoveStraight(float Direction)
 {
 	Velocity.X = FMath::Clamp(Direction, -1.0f, 1.0f) * Speed * (SpringArmComponent->TargetArmLength / 3000);
-	if (Velocity.X != 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("MOVING"));
-	}
 }
 
 void AExamplePawn::MoveSideways(float Direction)
 {
 	
 	Velocity.Y = FMath::Clamp(Direction, -1.0f, 1.0f) * Speed * (SpringArmComponent->TargetArmLength / 3000);
-	if (Velocity.Y != 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Emerald, TEXT("MOVING"));
-	}
 }
 
 void AExamplePawn::Rotate(float Magnitude)
 {
 	RotationalVelocity.Yaw = FMath::Clamp(Magnitude, -1.0f, 1.0f);
-	if (RotationalVelocity.Yaw != 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("ROTATING"));
-	}
 }
 
 void AExamplePawn::Zoom(float Magnitude)
 {
 	ZoomMovement = FMath::Clamp(Magnitude, -3.0f, 3.0f) * ZoomSpeed; 
-	if (ZoomMovement != 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("ZOOMING"));
-	}
 }
 
 void AExamplePawn::PauseMenu()
@@ -98,12 +82,10 @@ void AExamplePawn::PauseMenu()
 		if (PlayerController->bGamePaused == false)
 		{
 			PlayerController->ShowPauseMenu();
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("PAUSING"));
 		}
 		else
 		{
 			PlayerController->HidePauseMenu();
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("RESUMING"));
 		}
 	}
 }
@@ -112,9 +94,9 @@ void AExamplePawn::Place()
 {
 	if (SelectedEstablishmentClass && SelectedEstablishment)
 	{
-		if (!SelectedEstablishment->bConflictingWithOutsideEstablishment)
+		if (!SelectedEstablishment->bConflictingWithOutsideEstablishment) 
 		{
-			PlayerController->GenerationInfo->Economy -= SelectedEstablishment->Cost;
+			PlayerController->GenerationInfo->Economy -= SelectedEstablishment->Cost; 
 
 			AResidentialProperty* Residence = Cast<AResidentialProperty>(SelectedEstablishment);
 
@@ -127,8 +109,40 @@ void AExamplePawn::Place()
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("CANNOT PLACE ESTABLISHMENT"));
+			UGameplayStatics::PlaySound2D(SelectedEstablishment, ErrorSoundCue);
 		}
+	}
+}
+
+void AExamplePawn::Select()
+{
+	if (HighlightedEstablishment) 
+	{
+		HighlightedEstablishment = nullptr;
+	}
+	else
+	{
+		FHitResult HitResult;
+		PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Camera), true, HitResult); 
+		HighlightedEstablishment = Cast<AEstablishment>(HitResult.GetActor());
+	}
+}
+
+void AExamplePawn::Delete()
+{
+	if (HighlightedEstablishment) 
+	{ 
+		HighlightedEstablishment->Destroy(); 
+		PlayerController->UpdateSustainability();
+	}
+}
+
+void AExamplePawn::Duplicate()
+{
+	if (HighlightedEstablishment)
+	{
+		SelectedEstablishmentClass = HighlightedEstablishment->GetClass();
+		HighlightedEstablishment = nullptr;
 	}
 }
 
@@ -136,19 +150,15 @@ void AExamplePawn::ToggleBuilder()
 {
 	if (PlayerController->Builder)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("BUILDER"));
 		if (PlayerController->Builder->IsVisible() == true)
 		{
 			PlayerController->HideBuilder();
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("HIDING BUILDER"));
 		}
 		else
 		{
 			PlayerController->ShowBuilder();
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("SHOWING BUILDER"));
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Magenta, TEXT("BUILDER TEST 2"));
 }
 
 
@@ -165,7 +175,7 @@ void AExamplePawn::Tick(float DeltaTime)
 	Position = GetActorLocation();
 	AddActorWorldRotation(RotationalVelocity);
 	Rotation = GetActorRotation();
-	SpringArmComponent->TargetArmLength += ZoomMovement;
+	SpringArmComponent->TargetArmLength = FMath::Clamp(SpringArmComponent->TargetArmLength + ZoomMovement, 3000.f, 15000.f);
 
 	PlayerController->TranslatePlayerInformation(Position, Rotation);
 	PlayerController->GenerationInfo->Length = SpringArmComponent->TargetArmLength;
@@ -180,7 +190,6 @@ void AExamplePawn::Tick(float DeltaTime)
 	{
 		FHitResult HitResult;
 		PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Visibility), true, HitResult);
-		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Black, HitResult.Location.ToString()); 
 		FActorSpawnParameters SpawnInfo;
 		SelectedEstablishment = GetWorld()->SpawnActor<AEstablishment>(SelectedEstablishmentClass, (FVector)HitResult.Location, FRotator::ZeroRotator, SpawnInfo); 
 	}
@@ -204,5 +213,8 @@ void AExamplePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction("PauseMenu", IE_Pressed, this, &AExamplePawn::PauseMenu);
 	PlayerInputComponent->BindAction("PlaceEstablishment", IE_Pressed, this, &AExamplePawn::Place);
+	PlayerInputComponent->BindAction("SelectEstablishment", IE_Pressed, this, &AExamplePawn::Select);
+	PlayerInputComponent->BindAction("Copy", IE_Pressed, this, &AExamplePawn::Duplicate);
+	PlayerInputComponent->BindAction("Delete", IE_Pressed, this, &AExamplePawn::Delete);
 	PlayerInputComponent->BindAction("Builder", IE_Pressed, this, &AExamplePawn::ToggleBuilder); 
 }
