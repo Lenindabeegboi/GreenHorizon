@@ -221,15 +221,9 @@ void AMainPlayerController::YearlyReward()
 void AMainPlayerController::MonthUpdate()
 {
 	GenerationInfo->Month += 1;
-	try
-	{
-		UpdatePopulation();
-		UpdateCO2();
-		GenerateWealth();
-	}
-	catch (...)
-	{
-	}
+	UpdatePopulation();
+	UpdateCO2();
+	GenerateWealth();
 	if (GenerationInfo->Month % 12 == 0 && GenerationInfo->Month != 0) 
 	{ 
 		YearlyReward(); 
