@@ -9,6 +9,7 @@
 #include "Establishment.h"
 #include "GenerationLists.h"
 #include "CommercialEstablishment.h"
+#include "MainGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 void AMainPlayerController::ShowMainMenu_Implementation()
@@ -123,20 +124,20 @@ void AMainPlayerController::HideSettings_Implementation()
 
 void AMainPlayerController::ChangeGenerationInfo(FVector Position, FRotator Rotation, float Length, float CO2, int32 Population, int32 Economy, int32 Month, float TimeElapsed, FName GenerationName, float SustainabilityScore, int32 ResidentialArea) 
 {
-	GenerationInfo->GenerationName = GenerationName;
+	GameInstance->GenerationInfo->GenerationName = GenerationName;
 
-	GenerationInfo->CO2 = CO2; 
-	GenerationInfo->Economy = Economy; 
-	GenerationInfo->Population = Population; 
-	GenerationInfo->ResidentialArea = ResidentialArea;
-	GenerationInfo->SustainabilityScore = SustainabilityScore;
+	GameInstance->GenerationInfo->CO2 = CO2; 
+	GameInstance->GenerationInfo->Economy = Economy; 
+	GameInstance->GenerationInfo->Population = Population; 
+	GameInstance->GenerationInfo->ResidentialArea = ResidentialArea;
+	GameInstance->GenerationInfo->SustainabilityScore = SustainabilityScore;
 
-	GenerationInfo->Month = Month;
-	GenerationInfo->TimeElapsed = TimeElapsed; 
+	GameInstance->GenerationInfo->Month = Month;
+	GameInstance->GenerationInfo->TimeElapsed = TimeElapsed; 
 
-	GenerationInfo->Position = Position; 
-	GenerationInfo->Rotation = Rotation;
-	GenerationInfo->Length = Length; 
+	GameInstance->GenerationInfo->Position = Position; 
+	GameInstance->GenerationInfo->Rotation = Rotation;
+	GameInstance->GenerationInfo->Length = Length; 
 }
 
 void AMainPlayerController::SpawnEstatablishments(FName GenerationName)
@@ -171,7 +172,7 @@ void AMainPlayerController::UpdateSustainability()
 		}
 	}
 
-	GenerationInfo->SustainabilityScore = TotalSustainability / Establishments.Num();
+	GameInstance->GenerationInfo->SustainabilityScore = TotalSustainability / Establishments.Num();
 }
 
 void AMainPlayerController::GenerateWealth()
@@ -190,41 +191,41 @@ void AMainPlayerController::GenerateWealth()
 		}
 	}
 
-	GenerationInfo->Economy += Counter * int32(GenerationInfo->SustainabilityScore * pow(2.f, (FString::FromInt(GenerationInfo->Population)).Len())); 
+	GameInstance->GenerationInfo->Economy += Counter * int32(GameInstance->GenerationInfo->SustainabilityScore * pow(2.f, (FString::FromInt(GameInstance->GenerationInfo->Population)).Len())); 
 }
 
 void AMainPlayerController::UpdateCO2()
 {
-	GenerationInfo->CO2 += int32((GenerationInfo->Population / GenerationInfo->SustainabilityScore) * 1500) / 100;
+	GameInstance->GenerationInfo->CO2 += int32((GameInstance->GenerationInfo->Population / GameInstance->GenerationInfo->SustainabilityScore) * 1500) / 100;
 }
 
 void AMainPlayerController::UpdatePopulation()
 {
 	int32 ProjectedPopulation = 0;
-	if (GenerationInfo->SustainabilityScore >= 5)
+	if (GameInstance->GenerationInfo->SustainabilityScore >= 5)
 	{
-		ProjectedPopulation = int32((GenerationInfo->ResidentialArea / 20) * (GenerationInfo->SustainabilityScore / 3));
+		ProjectedPopulation = int32((GameInstance->GenerationInfo->ResidentialArea / 20) * (GameInstance->GenerationInfo->SustainabilityScore / 3));
 	}
 	else
 	{
-		ProjectedPopulation = int32((GenerationInfo->ResidentialArea / 20) / (5 - GenerationInfo->SustainabilityScore));
+		ProjectedPopulation = int32((GameInstance->GenerationInfo->ResidentialArea / 20) / (5 - GameInstance->GenerationInfo->SustainabilityScore));
 	}
 
-	if (GenerationInfo->Population != ProjectedPopulation) { GenerationInfo->Population = ProjectedPopulation; }
+	if (GameInstance->GenerationInfo->Population != ProjectedPopulation) { GameInstance->GenerationInfo->Population = ProjectedPopulation; }
 }
 
 void AMainPlayerController::YearlyReward()
 {
-	GenerationInfo->Economy += int32((GenerationInfo->Population / (FString::FromInt(GenerationInfo->Economy)).Len()) * GenerationInfo->SustainabilityScore * 10);
+	GameInstance->GenerationInfo->Economy += int32((GameInstance->GenerationInfo->Population / (FString::FromInt(GameInstance->GenerationInfo->Economy)).Len()) * GameInstance->GenerationInfo->SustainabilityScore * 10);
 }
 
 void AMainPlayerController::MonthUpdate()
 {
-	GenerationInfo->Month += 1;
+	GameInstance->GenerationInfo->Month += 1;
 	UpdatePopulation();
 	UpdateCO2();
 	GenerateWealth();
-	if (GenerationInfo->Month % 12 == 0 && GenerationInfo->Month != 0) 
+	if (GameInstance->GenerationInfo->Month % 12 == 0 && GameInstance->GenerationInfo->Month != 0) 
 	{ 
 		YearlyReward(); 
 	}
@@ -233,18 +234,18 @@ void AMainPlayerController::MonthUpdate()
 void AMainPlayerController::CreateGeneration_Implementation(FName GenerationName) 
 {
 	
-	if (GenerationInfo->GameLoadStatus == ELoadingGameType::New)
+	if (GameInstance->GenerationInfo->GameLoadStatus == ELoadingGameType::New)
 	{
 		ChangeGenerationInfo(FVector(0.f, 0.f, 300.f), FRotator(0.f, 0.f, 0.f), 3000.f, 400.f, 0, 10000000, 0, 0.f, GenerationName, 10.f, 0.f);
 		LoadInstance = nullptr;
 	}
-	else if (GenerationInfo->GameLoadStatus == ELoadingGameType::Continue)
+	else if (GameInstance->GenerationInfo->GameLoadStatus == ELoadingGameType::Continue)
 	{
 		UGenerationLists* GenerationList = Cast<UGenerationLists>(UGameplayStatics::LoadGameFromSlot("@---GENERATION---LIST---@", 0));
 		LoadInstance = Cast<USaveGeneration>(UGameplayStatics::LoadGameFromSlot(GenerationList->ListOfSavedGenerations.Last().ToString(), 0));
 		ChangeGenerationInfo(LoadInstance->Position, LoadInstance->Rotation, LoadInstance->Length, LoadInstance->CO2, LoadInstance->Population, LoadInstance->Economy, LoadInstance->Month, LoadInstance->TimeElapsed, LoadInstance->GenerationName, LoadInstance->SustainabilityScore, LoadInstance->ResidentialArea);
 	}
-	else if (GenerationInfo->GameLoadStatus == ELoadingGameType::Load)
+	else if (GameInstance->GenerationInfo->GameLoadStatus == ELoadingGameType::Load)
 	{
 		UGenerationLists* GenerationList = Cast<UGenerationLists>(UGameplayStatics::LoadGameFromSlot("@---GENERATION---LIST---@", 0));
 		LoadInstance = Cast<USaveGeneration>(UGameplayStatics::LoadGameFromSlot(GenerationName.ToString(), 0));
@@ -282,27 +283,27 @@ void AMainPlayerController::HideGameHUD_Implementation()
 
 void AMainPlayerController::TranslatePlayerInformation(FVector& Position, FRotator& Rotation)
 {
-	GenerationInfo->Position = Position;
-	GenerationInfo->Rotation = Rotation;
+	GameInstance->GenerationInfo->Position = Position;
+	GameInstance->GenerationInfo->Rotation = Rotation;
 }
 
 void AMainPlayerController::SaveGeneration()
 {
 	USaveGeneration* SaveInstance = Cast<USaveGeneration>(UGameplayStatics::CreateSaveGameObject(USaveGeneration::StaticClass()));
-	SaveInstance->Position = GenerationInfo->Position;
-	SaveInstance->Rotation = GenerationInfo->Rotation;
-	SaveInstance->Length = GenerationInfo->Length;
+	SaveInstance->Position = GameInstance->GenerationInfo->Position;
+	SaveInstance->Rotation = GameInstance->GenerationInfo->Rotation;
+	SaveInstance->Length = GameInstance->GenerationInfo->Length;
 	 
-	SaveInstance->Population = GenerationInfo->Population; 
-	SaveInstance->ResidentialArea = GenerationInfo->ResidentialArea;
-	SaveInstance->CO2 = GenerationInfo->CO2; 
-	SaveInstance->Economy = GenerationInfo->Economy;
-	SaveInstance->SustainabilityScore = GenerationInfo->SustainabilityScore;
+	SaveInstance->Population = GameInstance->GenerationInfo->Population; 
+	SaveInstance->ResidentialArea = GameInstance->GenerationInfo->ResidentialArea;
+	SaveInstance->CO2 = GameInstance->GenerationInfo->CO2; 
+	SaveInstance->Economy = GameInstance->GenerationInfo->Economy;
+	SaveInstance->SustainabilityScore = GameInstance->GenerationInfo->SustainabilityScore;
 
-	SaveInstance->Month = GenerationInfo->Month;
-	SaveInstance->TimeElapsed = GenerationInfo->TimeElapsed;
+	SaveInstance->Month = GameInstance->GenerationInfo->Month;
+	SaveInstance->TimeElapsed = GameInstance->GenerationInfo->TimeElapsed;
 
-	SaveInstance->GenerationName = GenerationInfo->GenerationName; 
+	SaveInstance->GenerationName = GameInstance->GenerationInfo->GenerationName; 
 
 	TArray<AActor*> Establishments = TArray<AActor*>(); 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEstablishment::StaticClass(), Establishments); 
@@ -333,6 +334,7 @@ void AMainPlayerController::SaveGeneration()
 
 void AMainPlayerController::BeginPlay()
 {
+	GameInstance = Cast<UMainGameInstance>(GetGameInstance());
 	bShowMouseCursor = true;
 	FString Current = GetWorld()->GetMapName();
 	Current.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
@@ -342,7 +344,7 @@ void AMainPlayerController::BeginPlay()
 	}
 	else
 	{
-		if (GenerationInfo->GameLoadStatus != ELoadingGameType::New) { SpawnEstatablishments(GenerationInfo->GenerationName); }
+		if (GameInstance->GenerationInfo->GameLoadStatus != ELoadingGameType::New) { SpawnEstatablishments(GameInstance->GenerationInfo->GenerationName); }
 		ShowGameHUD();
 		if (WBuilder)
 		{

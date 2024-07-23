@@ -34,6 +34,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	class USoundCue* ErrorSoundCue;
 
+	class UMainGameInstance* GameInstance;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

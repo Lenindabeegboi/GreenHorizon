@@ -61,7 +61,7 @@ public:
 	UUserWidget* GameHUD;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gnereation Info")
-	class UGenerationInformation* GenerationInfo;
+	class UMainGameInstance* GameInstance; 
 
 	class USaveGeneration* LoadInstance;
 

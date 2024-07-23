@@ -11,6 +11,7 @@
 #include "GenerationInformation.h"
 #include "ResidentialProperty.h"
 #include "Sound/SoundCue.h"
+#include "MainGameInstance.h"
 #include "Kismet/GameplayStatics.h" 
 
 // Sets default values
@@ -37,13 +38,15 @@ void AExamplePawn::BeginPlay()
 
 		PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
+		GameInstance = Cast<UMainGameInstance>(GetGameInstance());
+
 		Velocity = FVector(0.f, 0.f, 0.f);
 		Speed = 300.f;
 		ZoomSpeed = 100.f;
-		Position = PlayerController->GenerationInfo->Position;
-		Rotation = PlayerController->GenerationInfo->Rotation;
+		Position = GameInstance->GenerationInfo->Position;
+		Rotation = GameInstance->GenerationInfo->Rotation;
 
-		SpringArmComponent->TargetArmLength = PlayerController->GenerationInfo->Length;
+		SpringArmComponent->TargetArmLength = GameInstance->GenerationInfo->Length;
 		
 
 
@@ -96,11 +99,11 @@ void AExamplePawn::Place()
 	{
 		if (!SelectedEstablishment->bConflictingWithOutsideEstablishment) 
 		{
-			PlayerController->GenerationInfo->Economy -= SelectedEstablishment->Cost; 
+			GameInstance->GenerationInfo->Economy -= SelectedEstablishment->Cost; 
 
 			AResidentialProperty* Residence = Cast<AResidentialProperty>(SelectedEstablishment);
 
-			if (Residence) { PlayerController->GenerationInfo->ResidentialArea += Residence->ResidentialArea; }
+			if (Residence) { GameInstance->GenerationInfo->ResidentialArea += Residence->ResidentialArea; }
 
 			SelectedEstablishment = nullptr;
 			SelectedEstablishmentClass = nullptr;
@@ -167,7 +170,7 @@ void AExamplePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	PlayerController->GenerationInfo->TimeElapsed += GetWorld()->GetDeltaSeconds();
+	GameInstance->GenerationInfo->TimeElapsed += GetWorld()->GetDeltaSeconds();
 
 
 	Velocity *= DeltaTime;
@@ -178,7 +181,7 @@ void AExamplePawn::Tick(float DeltaTime)
 	SpringArmComponent->TargetArmLength = FMath::Clamp(SpringArmComponent->TargetArmLength + ZoomMovement, 3000.f, 15000.f);
 
 	PlayerController->TranslatePlayerInformation(Position, Rotation);
-	PlayerController->GenerationInfo->Length = SpringArmComponent->TargetArmLength;
+	GameInstance->GenerationInfo->Length = SpringArmComponent->TargetArmLength;
 
 	if (SelectedEstablishmentClass && SelectedEstablishment)
 	{
@@ -194,10 +197,10 @@ void AExamplePawn::Tick(float DeltaTime)
 		SelectedEstablishment = GetWorld()->SpawnActor<AEstablishment>(SelectedEstablishmentClass, (FVector)HitResult.Location, FRotator::ZeroRotator, SpawnInfo); 
 	}
 
-	if ((int32)PlayerController->GenerationInfo->TimeElapsed % 60 == 0 && (int32)PlayerController->GenerationInfo->TimeElapsed != 0) 
+	if ((int32)PlayerController->GameInstance->GenerationInfo->TimeElapsed % 60 == 0 && (int32)PlayerController->GameInstance->GenerationInfo->TimeElapsed != 0) 
 	{ 
 		PlayerController->MonthUpdate(); 
-		PlayerController->GenerationInfo->TimeElapsed += 1;
+		GameInstance->GenerationInfo->TimeElapsed += 1;
 	}
 
 }
