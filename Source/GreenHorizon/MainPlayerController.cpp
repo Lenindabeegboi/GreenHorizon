@@ -163,16 +163,20 @@ void AMainPlayerController::UpdateSustainability()
 	TArray<AActor*> Establishments = TArray<AActor*>();
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEstablishment::StaticClass(), Establishments);
 
-	for (AActor* Actor : Establishments)
+	if (Establishments.Num() != 0) 
 	{
-		AEstablishment* Establishment = Cast<AEstablishment>(Actor);
-		if (Establishment)
+		for (AActor* Actor : Establishments) 
 		{
-			TotalSustainability += Establishment->Sustainability;
+			AEstablishment* Establishment = Cast<AEstablishment>(Actor); 
+			if (Establishment) 
+			{
+				TotalSustainability += Establishment->Sustainability; 
+			}
 		}
-	}
 
-	GameInstance->GenerationInfo->SustainabilityScore = TotalSustainability / Establishments.Num();
+		GameInstance->GenerationInfo->SustainabilityScore = TotalSustainability / Establishments.Num(); 
+	}
+	else { GameInstance->GenerationInfo->SustainabilityScore = 10.f; }
 }
 
 void AMainPlayerController::GenerateWealth()
