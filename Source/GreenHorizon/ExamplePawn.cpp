@@ -134,7 +134,9 @@ void AExamplePawn::Select()
 void AExamplePawn::Delete()
 {
 	if (HighlightedEstablishment) 
-	{ 
+	{
+		AResidentialProperty* ResidentialProperty = Cast<AResidentialProperty>(HighlightedEstablishment);
+		if (ResidentialProperty) { PlayerController->GameInstance->GenerationInfo->ResidentialArea -= ResidentialProperty->ResidentialArea; }
 		HighlightedEstablishment->Destroy(); 
 		PlayerController->UpdateSustainability();
 	}
