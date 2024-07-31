@@ -17,7 +17,7 @@ public:
 	UBuilderComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Establishments")
-	TArray<class UEstablishmentDataAsset*> EstablishmentsList;
+	TArray<class UEstablishmentDataAsset*> EstablishmentsList;		// A list of all establishment data assets that are translated into buttons in the builder widget. 
 
 protected:
 	// Called when the game starts
